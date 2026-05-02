@@ -1,81 +1,544 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Synced</title>
-    <style>
-        /* This section controls how the page looks */
-        body {
-            background-color: #1a1a1a; /* Dark grey background */
-            color: #ffffff; /* White text */
-            font-family: 'Courier New', Courier, monospace; /* Timer-style font */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh; /* Full screen height */
-            margin: 0;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Synced</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital@0;1&family=JetBrains+Mono:wght@300;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:        #0e0e0e;
+      --surface:   #161616;
+      --border:    #252525;
+      --gold:      #c9a84c;
+      --gold-dim:  #7a6130;
+      --text:      #e8e0d0;
+      --muted:     #5a5448;
+      --danger:    #c0392b;
+      --success:   #2ecc71;
+      --radius:    12px;
+    }
 
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            font-weight: normal;
-        }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        #timer {
-            font-size: 11rem; /* Make the numbers huge */
-            font-weight: bold;
-            background-color: #333;
-            padding: 20px 40px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1.5rem 4rem;
+    }
 
-        .label {
-            margin-top: 10px;
-            color: #aaaaaa;
-        }
-    </style>
+    /* ── Grain overlay ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0;
+    }
+
+    .wrap { position: relative; z-index: 1; width: 100%; max-width: 760px; }
+
+    /* ── Header ── */
+    .site-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 3.5rem;
+    }
+    .logo {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 1.1rem; letter-spacing: 0.25em;
+      color: var(--gold); text-transform: uppercase;
+    }
+    .date-pill {
+      font-size: 0.72rem; color: var(--muted);
+      border: 1px solid var(--border); border-radius: 99px;
+      padding: 4px 14px; letter-spacing: 0.08em;
+    }
+
+    /* ── Day clock ── */
+    .clock-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem 2rem 2rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      position: relative; overflow: hidden;
+    }
+    .clock-card::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+    .clock-label {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 0.8rem; font-style: italic;
+      color: var(--muted); letter-spacing: 0.12em;
+      margin-bottom: 1.2rem;
+    }
+    #day-timer {
+      font-size: clamp(4rem, 14vw, 8rem);
+      font-weight: 700; color: var(--text);
+      letter-spacing: -0.02em; line-height: 1;
+    }
+    .progress-bar-wrap {
+      margin-top: 1.6rem; height: 3px;
+      background: var(--border); border-radius: 99px; overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+      transition: width 1s linear;
+    }
+    .progress-label {
+      display: flex; justify-content: space-between;
+      font-size: 0.65rem; color: var(--muted); margin-top: 6px;
+    }
+
+    /* ── Divider ── */
+    .section-title {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 0.75rem; font-style: italic;
+      color: var(--muted); letter-spacing: 0.15em;
+      text-transform: uppercase; margin-bottom: 1rem;
+    }
+
+    /* ── Focus card ── */
+    .focus-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .focus-idle {
+      display: flex; gap: 0.75rem; align-items: center;
+    }
+    .focus-input {
+      flex: 1;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem; padding: 0.75rem 1rem;
+      outline: none; transition: border-color 0.2s;
+    }
+    .focus-input::placeholder { color: var(--muted); }
+    .focus-input:focus { border-color: var(--gold-dim); }
+
+    .btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem; letter-spacing: 0.05em;
+      border: none; border-radius: 8px;
+      padding: 0.75rem 1.4rem; cursor: pointer;
+      transition: all 0.15s; white-space: nowrap;
+    }
+    .btn-gold {
+      background: var(--gold); color: #0e0e0e; font-weight: 700;
+    }
+    .btn-gold:hover { background: #d9b85c; }
+
+    .btn-outline {
+      background: transparent; color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { color: var(--text); border-color: var(--muted); }
+
+    .btn-danger {
+      background: transparent; color: var(--danger);
+      border: 1px solid #4a1a17;
+    }
+    .btn-danger:hover { background: #1e0b0a; }
+
+    /* ── Active session ── */
+    .active-session { display: none; }
+    .session-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.2rem;
+    }
+    .session-name-tag {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 1rem; font-style: italic;
+      color: var(--gold);
+    }
+    .session-status {
+      font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em;
+    }
+    .status-dot {
+      display: inline-block; width: 7px; height: 7px;
+      border-radius: 50%; background: var(--success);
+      margin-right: 6px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+    .status-dot.paused { background: var(--gold); animation: none; }
+
+    #focus-timer {
+      font-size: clamp(3rem, 10vw, 5.5rem);
+      font-weight: 700; letter-spacing: -0.02em;
+      line-height: 1; color: var(--text); margin-bottom: 1.2rem;
+    }
+    .session-controls { display: flex; gap: 0.75rem; }
+
+    /* ── History ── */
+    .history-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .history-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .history-count {
+      font-size: 0.7rem; color: var(--muted);
+    }
+
+    #session-list { list-style: none; }
+    #session-list li {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.9rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    #session-list li:last-child { border-bottom: none; }
+    #session-list li:hover { background: #1c1c1c; }
+
+    .session-item-name {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 0.9rem; font-style: italic;
+      color: var(--text); flex: 1;
+    }
+    .session-item-meta {
+      text-align: right;
+    }
+    .session-item-dur {
+      font-size: 0.82rem; color: var(--gold); font-weight: 500;
+    }
+    .session-item-date {
+      font-size: 0.65rem; color: var(--muted); margin-top: 2px;
+    }
+
+    .history-empty {
+      padding: 2.5rem 1.5rem; text-align: center;
+      font-size: 0.78rem; color: var(--muted); font-style: italic;
+      font-family: 'Libre Baskerville', serif;
+    }
+
+    .clear-btn {
+      font-size: 0.68rem; color: var(--muted); background: none;
+      border: none; cursor: pointer; letter-spacing: 0.05em;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .clear-btn:hover { color: var(--danger); }
+
+    /* ── Learn More ── */
+    .learn-more-link {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; color: var(--muted);
+      text-decoration: none; letter-spacing: 0.06em;
+      border: 1px solid var(--border); border-radius: 99px;
+      padding: 4px 14px;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+    .learn-more-link:hover { color: var(--gold); border-color: var(--gold-dim); }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 3rem; text-align: center;
+      font-family: 'Libre Baskerville', serif;
+      font-style: italic; font-size: 0.78rem; color: var(--muted);
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .wrap > * { animation: fadeIn 0.5s ease both; }
+    .site-header  { animation-delay: 0s; }
+    .clock-card   { animation-delay: 0.08s; }
+    .focus-card   { animation-delay: 0.16s; }
+    .history-card { animation-delay: 0.24s; }
+    .footer       { animation-delay: 0.32s; }
+  </style>
 </head>
 <body>
+<div class="wrap">
 
-    <h1>Next Reset In:</h1>
-    <div id="timer">Loading...</div>
-    <div class="label">The best present of life is PRESENT :)</div>
+  <!-- Header -->
+  <header class="site-header">
+    <span class="logo">Synced</span>
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <span class="date-pill" id="date-label">—</span>
+      <a class="learn-more-link" href="https://www.padmalayarawal.com/synced" target="_blank" rel="noopener">
+        Learn more ↗
+      </a>
+    </div>
+  </header>
 
-    <script>
-        /* This section controls the logic/math */
-        function updateTimer() {
-            // 1. Get the current time
-            const now = new Date();
+  <!-- Day countdown -->
+  <div class="clock-card">
+    <div class="clock-label">next daily reset in</div>
+    <div id="day-timer">00:00:00</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="day-progress" style="width:0%"></div>
+    </div>
+    <div class="progress-label">
+      <span>midnight</span>
+      <span id="progress-pct">0% elapsed</span>
+      <span>midnight</span>
+    </div>
+  </div>
 
-            // 2. Set the target time to tomorrow at 00:00:00
-            const tomorrow = new Date(now);
-            tomorrow.setHours(24, 0, 0, 0);
+  <!-- Focus session -->
+  <p class="section-title">Focus Session</p>
+  <div class="focus-card">
+    <!-- Idle state -->
+    <div class="focus-idle" id="focus-idle">
+      <input
+        class="focus-input"
+        id="session-name-input"
+        type="text"
+        placeholder="What are you working on?"
+        maxlength="60"
+      />
+      <button class="btn btn-gold" id="start-btn">Start</button>
+    </div>
 
-            // 3. Calculate the difference in milliseconds
-            const diff = tomorrow - now;
+    <!-- Active / paused state -->
+    <div class="active-session" id="active-session">
+      <div class="session-header">
+        <div class="session-name-tag" id="active-name">—</div>
+        <div class="session-status">
+          <span class="status-dot" id="status-dot"></span>
+          <span id="status-text">FOCUSING</span>
+        </div>
+      </div>
+      <div id="focus-timer">00:00:00</div>
+      <div class="session-controls">
+        <button class="btn btn-outline" id="pause-btn">Pause</button>
+        <button class="btn btn-danger"  id="stop-btn">Stop &amp; Save</button>
+      </div>
+    </div>
+  </div>
 
-            // 4. Calculate hours, minutes, and seconds from the difference
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+  <!-- History -->
+  <p class="section-title">Session History</p>
+  <div class="history-card">
+    <div class="history-head">
+      <span class="history-count" id="history-count">0 sessions</span>
+      <button class="clear-btn" id="clear-btn">clear all</button>
+    </div>
+    <ul id="session-list">
+      <li><div class="history-empty">No sessions yet. Start focusing!</div></li>
+    </ul>
+  </div>
 
-            // 5. Add a "0" in front if the number is less than 10 (e.g., "05" instead of "5")
-            const h = hours < 10 ? "0" + hours : hours;
-            const m = minutes < 10 ? "0" + minutes : minutes;
-            const s = seconds < 10 ? "0" + seconds : seconds;
+  <div class="footer">The best present of life is PRESENT :)</div>
+</div>
 
-            // 6. Display the result in the HTML element with id="timer"
-            document.getElementById("timer").innerText = `${h}:${m}:${s}`;
-        }
+<script>
+/* ── Constants ── */
+const STORAGE_KEY = 'synced_sessions';
+const SECONDS_IN_DAY = 86400;
 
-        // Run the function immediately, then update it every 1000 milliseconds (1 second)
-        updateTimer();
-        setInterval(updateTimer, 1000);
-    </script>
+/* ── State ── */
+let focusStart   = null;   // Date when current session started
+let focusPaused  = false;
+let pausedAt     = null;   // elapsed seconds when paused
+let focusElapsed = 0;      // total elapsed seconds (live)
+let focusName    = '';
+let tickInterval = null;
 
+/* ── Helpers ── */
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function fmtDuration(sec) {
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = sec % 60;
+  return h > 0
+    ? `${pad(h)}:${pad(m)}:${pad(s)}`
+    : `${pad(m)}:${pad(s)}`;
+}
+
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+       + ' · ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+}
+
+/* ── Day countdown ── */
+function updateDayClock() {
+  const now      = new Date();
+  const tomorrow = new Date(now);
+  tomorrow.setHours(24, 0, 0, 0);
+  const diff = Math.floor((tomorrow - now) / 1000);          // seconds left
+  const elapsed = SECONDS_IN_DAY - diff;
+  const pct = ((elapsed / SECONDS_IN_DAY) * 100).toFixed(1);
+
+  const h = Math.floor(diff / 3600);
+  const m = Math.floor((diff % 3600) / 60);
+  const s = diff % 60;
+  document.getElementById('day-timer').textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
+  document.getElementById('day-progress').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '% elapsed';
+
+  // Date pill
+  document.getElementById('date-label').textContent =
+    now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+/* ── Focus timer tick ── */
+function focusTick() {
+  if (focusPaused) return;
+  focusElapsed = Math.floor((Date.now() - focusStart) / 1000) + (pausedAt || 0);
+  document.getElementById('focus-timer').textContent = fmtDuration(focusElapsed);
+}
+
+/* ── UI state toggle ── */
+function showActive(name) {
+  document.getElementById('focus-idle').style.display    = 'none';
+  document.getElementById('active-session').style.display = 'block';
+  document.getElementById('active-name').textContent = name;
+}
+function showIdle() {
+  document.getElementById('focus-idle').style.display    = 'flex';
+  document.getElementById('active-session').style.display = 'none';
+  document.getElementById('focus-timer').textContent = '00:00:00';
+  document.getElementById('session-name-input').value = '';
+}
+
+/* ── Start ── */
+document.getElementById('start-btn').addEventListener('click', () => {
+  const raw = document.getElementById('session-name-input').value.trim();
+  focusName    = raw || 'Untitled Session';
+  focusStart   = Date.now();
+  focusPaused  = false;
+  pausedAt     = 0;
+  focusElapsed = 0;
+
+  showActive(focusName);
+  updateStatusDot(false);
+  tickInterval = setInterval(focusTick, 1000);
+  focusTick();
+});
+
+/* ── Pause / Resume ── */
+document.getElementById('pause-btn').addEventListener('click', () => {
+  if (!focusPaused) {
+    // pause
+    focusPaused = true;
+    pausedAt    = focusElapsed;
+    focusStart  = null;
+    document.getElementById('pause-btn').textContent = 'Resume';
+    updateStatusDot(true);
+  } else {
+    // resume
+    focusPaused = false;
+    focusStart  = Date.now();
+    document.getElementById('pause-btn').textContent = 'Pause';
+    updateStatusDot(false);
+  }
+});
+
+/* ── Stop & Save ── */
+document.getElementById('stop-btn').addEventListener('click', () => {
+  clearInterval(tickInterval);
+  tickInterval = null;
+
+  if (focusElapsed > 0) {
+    saveSession({ name: focusName, duration: focusElapsed, date: new Date().toISOString() });
+    renderHistory();
+  }
+
+  focusStart  = null;
+  focusPaused = false;
+  pausedAt    = 0;
+  focusElapsed = 0;
+  showIdle();
+});
+
+/* ── Status dot ── */
+function updateStatusDot(paused) {
+  const dot  = document.getElementById('status-dot');
+  const text = document.getElementById('status-text');
+  const btn  = document.getElementById('pause-btn');
+  if (paused) {
+    dot.classList.add('paused');
+    text.textContent = 'PAUSED';
+    btn.textContent  = 'Resume';
+  } else {
+    dot.classList.remove('paused');
+    text.textContent = 'FOCUSING';
+    btn.textContent  = 'Pause';
+  }
+}
+
+/* ── Local storage ── */
+function loadSessions()  { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+function saveSession(s)  {
+  const list = loadSessions();
+  list.unshift(s);                          // newest first
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+}
+function clearSessions() {
+  localStorage.removeItem(STORAGE_KEY);
+  renderHistory();
+}
+
+/* ── Render history ── */
+function renderHistory() {
+  const sessions = loadSessions();
+  const list     = document.getElementById('session-list');
+  const counter  = document.getElementById('history-count');
+
+  counter.textContent = sessions.length === 1 ? '1 session' : `${sessions.length} sessions`;
+
+  if (sessions.length === 0) {
+    list.innerHTML = '<li><div class="history-empty">No sessions yet. Start focusing!</div></li>';
+    return;
+  }
+
+  list.innerHTML = sessions.map(s => `
+    <li>
+      <div class="session-item-name">${escHtml(s.name)}</div>
+      <div class="session-item-meta">
+        <div class="session-item-dur">${fmtDuration(s.duration)}</div>
+        <div class="session-item-date">${fmtDate(s.date)}</div>
+      </div>
+    </li>
+  `).join('');
+}
+
+function escHtml(str) {
+  return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+document.getElementById('clear-btn').addEventListener('click', () => {
+  if (confirm('Clear all saved sessions?')) clearSessions();
+});
+
+/* ── Allow Enter key to start ── */
+document.getElementById('session-name-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('start-btn').click();
+});
+
+/* ── Init ── */
+updateDayClock();
+setInterval(updateDayClock, 1000);
+renderHistory();
+</script>
 </body>
 </html>
