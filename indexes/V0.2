@@ -8,497 +8,252 @@
   <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital@0;1&family=JetBrains+Mono:wght@300;500;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg:        #0e0e0e;
-      --surface:   #161616;
-      --border:    #252525;
-      --gold:      #c9a84c;
-      --gold-dim:  #7a6130;
-      --text:      #e8e0d0;
-      --muted:     #5a5448;
-      --danger:    #c0392b;
-      --success:   #2ecc71;
-      --radius:    12px;
+      --bg:#0e0e0e;--surface:#161616;--border:#252525;--gold:#c9a84c;--gold-dim:#7a6130;
+      --text:#e8e0d0;--muted:#5a5448;--danger:#c0392b;--success:#2ecc71;--radius:12px;
     }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:3rem 1.5rem 4rem}
+    body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0}
+    .wrap{position:relative;z-index:1;width:100%;max-width:760px}
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    /* Header */
+    .site-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:3.5rem}
+    .logo{font-family:'Libre Baskerville',serif;font-size:1.1rem;letter-spacing:.25em;color:var(--gold);text-transform:uppercase}
+    .date-pill{font-size:.72rem;color:var(--muted);border:1px solid var(--border);border-radius:99px;padding:4px 14px;letter-spacing:.08em}
+    .learn-more-link{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);text-decoration:none;letter-spacing:.06em;border:1px solid var(--border);border-radius:99px;padding:4px 14px;transition:color .2s,border-color .2s;white-space:nowrap}
+    .learn-more-link:hover{color:var(--gold);border-color:var(--gold-dim)}
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'JetBrains Mono', monospace;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 3rem 1.5rem 4rem;
-    }
+    /* Day clock */
+    .clock-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem 2rem;text-align:center;margin-bottom:1.5rem;position:relative;overflow:hidden}
+    .clock-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+    .clock-label{font-family:'Libre Baskerville',serif;font-size:.8rem;font-style:italic;color:var(--muted);letter-spacing:.12em;margin-bottom:1.2rem}
+    #day-timer{font-size:clamp(2rem,10vw,8rem);font-weight:700;color:var(--text);letter-spacing:-.02em;line-height:1;word-break:break-all;width:100%}
+    .progress-bar-wrap{margin-top:1.6rem;height:3px;background:var(--border);border-radius:99px;overflow:hidden}
+    .progress-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold-dim),var(--gold));transition:width 1s linear}
+    .progress-label{display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);margin-top:6px}
 
-    /* ── Grain overlay ── */
-    body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none; z-index: 0;
-    }
+    /* Section title */
+    .section-title{font-family:'Libre Baskerville',serif;font-size:.75rem;font-style:italic;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-bottom:1rem}
 
-    .wrap { position: relative; z-index: 1; width: 100%; max-width: 760px; }
+    /* Focus card */
+    .focus-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.8rem;margin-bottom:1.5rem;position:relative}
+    .focus-idle{display:flex;flex-direction:column;gap:.85rem}
 
-    /* ── Header ── */
-    .site-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 3.5rem;
-    }
-    .logo {
-      font-family: 'Libre Baskerville', serif;
-      font-size: 1.1rem; letter-spacing: 0.25em;
-      color: var(--gold); text-transform: uppercase;
-    }
-    .date-pill {
-      font-size: 0.72rem; color: var(--muted);
-      border: 1px solid var(--border); border-radius: 99px;
-      padding: 4px 14px; letter-spacing: 0.08em;
-    }
+    /* Mode toggle */
+    .mode-row{display:flex;gap:.5rem}
+    .mode-btn{display:flex;align-items:center;gap:.4rem;font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.05em;padding:6px 14px;border-radius:99px;cursor:pointer;background:none;border:1px solid var(--border);color:var(--muted);transition:all .15s}
+    .mode-btn.active{background:var(--gold);color:#0e0e0e;border-color:var(--gold);font-weight:700}
+    .mode-btn:not(.active):hover{border-color:var(--muted);color:var(--text)}
 
-    /* ── Day clock ── */
-    .clock-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 2.5rem 2rem 2rem;
-      text-align: center;
-      margin-bottom: 1.5rem;
-      position: relative; overflow: hidden;
-    }
-    .clock-card::after {
-      content: '';
-      position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    }
-    .clock-label {
-      font-family: 'Libre Baskerville', serif;
-      font-size: 0.8rem; font-style: italic;
-      color: var(--muted); letter-spacing: 0.12em;
-      margin-bottom: 1.2rem;
-    }
-    #day-timer {
-      font-size: clamp(4rem, 14vw, 8rem);
-      font-weight: 700; color: var(--text);
-      letter-spacing: -0.02em; line-height: 1;
-    }
-    .progress-bar-wrap {
-      margin-top: 1.6rem; height: 3px;
-      background: var(--border); border-radius: 99px; overflow: hidden;
-    }
-    .progress-bar-fill {
-      height: 100%; border-radius: 99px;
-      background: linear-gradient(90deg, var(--gold-dim), var(--gold));
-      transition: width 1s linear;
-    }
-    .progress-label {
-      display: flex; justify-content: space-between;
-      font-size: 0.65rem; color: var(--muted); margin-top: 6px;
-    }
+    /* Target inputs */
+    .target-row{display:flex;align-items:flex-start;gap:.75rem}
+    .target-label{font-size:.68rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;flex-shrink:0;padding-top:8px}
+    .target-inputs-col{display:flex;flex-direction:column;gap:4px}
+    .target-inputs{display:flex;align-items:center;gap:.35rem}
+    .target-field{display:flex;align-items:center;gap:.25rem}
+    .target-num{width:52px;text-align:center;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.9rem;padding:6px 4px;outline:none;transition:border-color .2s;-moz-appearance:textfield}
+    .target-num::-webkit-inner-spin-button,.target-num::-webkit-outer-spin-button{-webkit-appearance:none}
+    .target-num:focus{border-color:var(--gold-dim)}
+    .target-unit{font-size:.68rem;color:var(--muted)}
+    .target-sep{font-size:.8rem;color:var(--border)}
 
-    /* ── Divider ── */
-    .section-title {
-      font-family: 'Libre Baskerville', serif;
-      font-size: 0.75rem; font-style: italic;
-      color: var(--muted); letter-spacing: 0.15em;
-      text-transform: uppercase; margin-bottom: 1rem;
-    }
+    /* Validation */
+    .target-error{font-size:.65rem;color:var(--danger);letter-spacing:.04em;opacity:0;transition:opacity .2s;min-height:1rem;display:block}
+    .input-error{border-color:var(--danger)!important}
+    @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+    .input-shake{animation:shake .36s ease}
 
-    /* ── Focus card ── */
-    .focus-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.8rem;
-      margin-bottom: 1.5rem;
-    }
+    /* Buttons */
+    .btn{font-family:'JetBrains Mono',monospace;font-size:.8rem;letter-spacing:.05em;border:none;border-radius:8px;padding:.75rem 1.4rem;cursor:pointer;transition:all .15s;white-space:nowrap}
+    .btn-gold{background:var(--gold);color:#0e0e0e;font-weight:700}
+    .btn-gold:hover{background:#d9b85c}
+    .btn-outline{background:transparent;color:var(--muted);border:1px solid var(--border)}
+    .btn-outline:hover{color:var(--text);border-color:var(--muted)}
+    .btn-danger{background:transparent;color:var(--danger);border:1px solid #4a1a17}
+    .btn-danger:hover{background:#1e0b0a}
 
-    .focus-idle {
-      display: flex; gap: 0.75rem; align-items: center;
-    }
-    .focus-input {
-      flex: 1;
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: 8px; color: var(--text);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85rem; padding: 0.75rem 1rem;
-      outline: none; transition: border-color 0.2s;
-    }
-    .focus-input::placeholder { color: var(--muted); }
-    .focus-input:focus { border-color: var(--gold-dim); }
+    /* Active session */
+    .active-session{display:none}
+    .session-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem}
+    .session-name-tag{font-family:'Libre Baskerville',serif;font-size:1rem;font-style:italic;color:var(--gold)}
+    .session-status{font-size:.65rem;color:var(--muted);letter-spacing:.1em}
+    .status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--success);margin-right:6px;animation:pulse 2s ease-in-out infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    .status-dot.paused{background:var(--gold);animation:none}
+    #focus-timer{font-size:clamp(1.5rem,8vw,5.5rem);font-weight:700;letter-spacing:-.02em;line-height:1;color:var(--text);margin-bottom:1.2rem;width:100%;overflow:hidden;white-space:nowrap;text-overflow:clip}
+    .session-controls{display:flex;gap:.75rem}
+    .cd-progress-wrap{height:3px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:.4rem}
+    .cd-progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold-dim),var(--gold));transition:width 1s linear}
 
-    .btn {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem; letter-spacing: 0.05em;
-      border: none; border-radius: 8px;
-      padding: 0.75rem 1.4rem; cursor: pointer;
-      transition: all 0.15s; white-space: nowrap;
-    }
-    .btn-gold {
-      background: var(--gold); color: #0e0e0e; font-weight: 700;
-    }
-    .btn-gold:hover { background: #d9b85c; }
+    /* Expand btn */
+    .expand-btn{position:absolute;top:1rem;right:1rem;background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;padding:5px 7px;display:flex;align-items:center;justify-content:center;transition:color .15s,border-color .15s;z-index:2}
+    .expand-btn:hover{color:var(--gold);border-color:var(--gold-dim)}
 
-    .btn-outline {
-      background: transparent; color: var(--muted);
-      border: 1px solid var(--border);
-    }
-    .btn-outline:hover { color: var(--text); border-color: var(--muted); }
+    /* History */
+    .history-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .history-head{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.5rem;border-bottom:1px solid var(--border)}
+    .history-count{font-size:.7rem;color:var(--muted)}
+    .clear-confirm-wrap{display:flex;align-items:center;gap:.5rem}
+    .clear-confirm{display:flex;align-items:center;gap:.4rem}
+    .clear-btn{font-size:.68rem;color:var(--muted);background:none;border:none;cursor:pointer;letter-spacing:.05em;font-family:'JetBrains Mono',monospace}
+    .clear-btn:hover{color:var(--danger)}
+    .clear-confirm-text{font-size:.68rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
+    .clear-yes,.clear-no{font-family:'JetBrains Mono',monospace;font-size:.68rem;border-radius:5px;padding:2px 8px;cursor:pointer;border:1px solid;transition:all .15s}
+    .clear-yes{color:var(--danger);border-color:#4a1a17;background:none}
+    .clear-yes:hover{background:#1e0b0a}
+    .clear-no{color:var(--muted);border-color:var(--border);background:none}
+    .clear-no:hover{color:var(--text)}
 
-    .btn-danger {
-      background: transparent; color: var(--danger);
-      border: 1px solid #4a1a17;
-    }
-    .btn-danger:hover { background: #1e0b0a; }
+    #session-list{list-style:none}
+    #session-list li{display:flex;align-items:center;gap:.5rem;padding:.9rem 1.5rem;border-bottom:1px solid var(--border);transition:background .15s}
+    #session-list li:last-child{border-bottom:none}
+    #session-list li:hover{background:#1c1c1c}
 
-    /* ── Active session ── */
-    .active-session { display: none; }
-    .session-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 1.2rem;
-    }
-    .session-name-tag {
-      font-family: 'Libre Baskerville', serif;
-      font-size: 1rem; font-style: italic;
-      color: var(--gold);
-    }
-    .session-status {
-      font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em;
-    }
-    .status-dot {
-      display: inline-block; width: 7px; height: 7px;
-      border-radius: 50%; background: var(--success);
-      margin-right: 6px;
-      animation: pulse 2s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.3; }
-    }
-    .status-dot.paused { background: var(--gold); animation: none; }
+    .session-item-name-wrap{flex:1;min-width:0}
+    .session-item-name{font-family:'Libre Baskerville',serif;font-size:.9rem;font-style:italic;color:var(--text);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .session-name-edit{width:100%;max-width:220px;background:var(--bg);border:1px solid var(--gold-dim);border-radius:6px;color:var(--text);font-family:'Libre Baskerville',serif;font-size:.88rem;font-style:italic;padding:3px 8px;outline:none}
 
-    #focus-timer {
-      font-size: clamp(3rem, 10vw, 5.5rem);
-      font-weight: 700; letter-spacing: -0.02em;
-      line-height: 1; color: var(--text); margin-bottom: 1.2rem;
-    }
-    .session-controls { display: flex; gap: 0.75rem; }
+    .session-item-meta{text-align:right;flex-shrink:0}
+    .session-item-dur{font-size:.82rem;color:var(--gold);font-weight:500}
+    .session-item-date{font-size:.65rem;color:var(--muted);margin-top:2px}
 
-    /* ── Fullscreen expand btn ── */
-    .expand-btn {
-      position: absolute; top: 1rem; right: 1rem;
-      background: none; border: 1px solid var(--border);
-      border-radius: 6px; color: var(--muted); cursor: pointer;
-      padding: 5px 7px; display: flex; align-items: center; justify-content: center;
-      transition: color 0.15s, border-color 0.15s;
-      z-index: 2;
-    }
-    .expand-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
+    .session-item-actions{display:flex;align-items:center;gap:.4rem;flex-shrink:0;opacity:0;transition:opacity .15s}
+    #session-list li:hover .session-item-actions{opacity:1}
+    #session-list li.editing .session-item-actions{opacity:1}
 
-    /* session header needs relative too */
-    .focus-card { position: relative; }
+    .session-edit-btn,.session-continue-btn,.session-delete-btn{background:none;border:none;cursor:pointer;padding:5px 6px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:color .15s,background .15s;flex-shrink:0}
+    .session-edit-btn{color:#3a3530}
+    .session-edit-btn:hover{color:var(--gold);background:#1c1a14}
+    .session-continue-btn{color:#2a6a4a;border:1px solid #1a3a2a}
+    .session-continue-btn:hover{color:var(--success);background:#0a1f14;border-color:#2a6a4a}
+    .session-delete-btn{color:#3a2a29}
+    .session-delete-btn:hover{color:var(--danger);background:#1e0b0a}
 
-    /* ── Fullscreen overlay ── */
-    .fs-overlay {
-      position: fixed; inset: 0; z-index: 1000;
-      background: var(--bg);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-    .fs-overlay.visible { opacity: 1; pointer-events: all; }
+    .history-empty{padding:2.5rem 1.5rem;text-align:center;font-size:.78rem;color:var(--muted);font-style:italic;font-family:'Libre Baskerville',serif}
 
-    .fs-label {
-      font-family: 'Libre Baskerville', serif;
-      font-size: 1rem; font-style: italic;
-      color: var(--muted); letter-spacing: 0.15em;
-      margin-bottom: 1.5rem;
-    }
-    .fs-timer {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: clamp(5rem, 20vw, 16rem);
-      font-weight: 700; color: var(--text);
-      letter-spacing: -0.02em; line-height: 1;
-    }
-    .fs-sub {
-      margin-top: 1.5rem;
-      font-size: 0.75rem; color: var(--muted); letter-spacing: 0.1em;
-    }
-    .fs-progress-wrap {
-      width: min(700px, 80vw); height: 2px;
-      background: var(--border); border-radius: 99px; overflow: hidden;
-      margin-top: 2rem;
-    }
-    .fs-progress-fill {
-      height: 100%; border-radius: 99px;
-      background: linear-gradient(90deg, var(--gold-dim), var(--gold));
-      transition: width 1s linear;
-    }
-    .fs-status {
-      display: flex; align-items: center; gap: 0.5rem;
-      margin-top: 1.2rem; font-size: 0.72rem; color: var(--muted); letter-spacing: 0.1em;
-    }
-    .fs-close {
-      position: fixed; top: 1.5rem; right: 1.5rem;
-      background: none; border: 1px solid var(--border);
-      border-radius: 8px; color: var(--muted); cursor: pointer;
-      padding: 8px 14px; font-family: 'JetBrains Mono', monospace;
-      font-size: 0.72rem; letter-spacing: 0.06em;
-      transition: color 0.15s, border-color 0.15s;
-    }
-    .fs-close:hover { color: var(--text); border-color: var(--muted); }
+    /* Info panel */
+    .info-toggle{display:flex;align-items:center;justify-content:center;gap:.6rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);letter-spacing:.08em;padding:.75rem 1.25rem;margin-top:2rem;width:100%;transition:color .2s,border-color .2s}
+    .info-toggle:hover{color:var(--text);border-color:var(--muted)}
+    .info-icon{width:16px;height:16px;border-radius:50%;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:.6rem;flex-shrink:0}
+    .info-panel{background:#111;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;max-height:0;transition:max-height .4s ease,margin .3s;margin-top:0}
+    .info-panel.open{max-height:600px;margin-top:.75rem}
+    .info-panel-inner{padding:1.4rem 1.5rem}
+    .info-panel h4{font-family:'Libre Baskerville',serif;font-size:.82rem;font-style:italic;color:var(--gold);margin-bottom:1rem}
+    .info-row{display:flex;gap:1rem;margin-bottom:.9rem;align-items:flex-start}
+    .info-badge{font-size:.62rem;background:var(--border);color:var(--muted);border-radius:4px;padding:2px 7px;white-space:nowrap;margin-top:2px;flex-shrink:0;letter-spacing:.05em}
+    .info-badge.gold{background:#2a2010;color:var(--gold-dim)}
+    .info-desc{font-size:.75rem;color:#7a7268;line-height:1.6}
+    .info-desc strong{color:var(--muted);font-weight:500}
+    .info-key{display:inline-block;font-size:.68rem;background:#1a1a1a;color:var(--gold-dim);border:1px solid var(--border);border-radius:4px;padding:1px 7px;font-family:'JetBrains Mono',monospace}
+    .info-note{margin-top:.8rem;padding-top:.8rem;border-top:1px solid var(--border);font-size:.7rem;color:var(--muted);line-height:1.5;font-style:italic;font-family:'Libre Baskerville',serif}
 
-    /* grain on overlay too */
-    .fs-overlay::before {
-      content: '';
-      position: fixed; inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-    }
+    /* Ping */
+    .ping-overlay{position:fixed;inset:0;z-index:2000;background:rgba(14,14,14,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .4s ease}
+    .ping-overlay.visible{opacity:1;pointer-events:all}
+    .ping-icon{font-size:3rem;margin-bottom:1rem;animation:pingPulse 1s ease-in-out infinite}
+    @keyframes pingPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:.7}}
+    .ping-title{font-family:'Libre Baskerville',serif;font-size:1.4rem;font-style:italic;color:var(--gold);margin-bottom:.5rem}
+    .ping-sub{font-size:.75rem;color:var(--muted);letter-spacing:.1em}
 
-    /* ── History ── */
-    .history-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-    .history-head {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 1.1rem 1.5rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .history-count {
-      font-size: 0.7rem; color: var(--muted);
-    }
+    /* Fullscreen */
+    .fs-overlay{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s ease}
+    .fs-overlay::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none}
+    .fs-overlay.visible{opacity:1;pointer-events:all}
+    .fs-label{font-family:'Libre Baskerville',serif;font-size:1rem;font-style:italic;color:var(--muted);letter-spacing:.15em;margin-bottom:1.5rem}
+    .fs-timer{font-family:'JetBrains Mono',monospace;font-size:clamp(2rem,12vw,16rem);font-weight:700;color:var(--text);letter-spacing:-.02em;line-height:1;width:90vw;text-align:center;overflow:hidden;white-space:nowrap;word-break:break-all}
+    .fs-sub{margin-top:1.5rem;font-size:.75rem;color:var(--muted);letter-spacing:.1em}
+    .fs-progress-wrap{width:min(700px,80vw);height:2px;background:var(--border);border-radius:99px;overflow:hidden;margin-top:2rem}
+    .fs-progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold-dim),var(--gold));transition:width 1s linear}
+    .fs-status{display:flex;align-items:center;gap:.5rem;margin-top:1.2rem;font-size:.72rem;color:var(--muted);letter-spacing:.1em}
+    .fs-close{position:fixed;top:1.5rem;right:1.5rem;background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);cursor:pointer;padding:8px 14px;font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.06em;transition:color .15s,border-color .15s;z-index:1001}
+    .fs-close:hover{color:var(--text);border-color:var(--muted)}
 
-    #session-list { list-style: none; }
-    #session-list li {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0.9rem 1.5rem;
-      border-bottom: 1px solid var(--border);
-      transition: background 0.15s;
-    }
-    #session-list li:last-child { border-bottom: none; }
-    #session-list li:hover { background: #1c1c1c; }
+    /* Footer */
+    .footer{margin-top:3rem;text-align:center;font-family:'Libre Baskerville',serif;font-style:italic;font-size:.78rem;color:var(--muted)}
 
-    .session-item-name {
-      font-family: 'Libre Baskerville', serif;
-      font-size: 0.9rem; font-style: italic;
-      color: var(--text); flex: 1;
-    }
-    .session-item-meta {
-      text-align: right;
-    }
-    .session-item-dur {
-      font-size: 0.82rem; color: var(--gold); font-weight: 500;
-    }
-    .session-item-date {
-      font-size: 0.65rem; color: var(--muted); margin-top: 2px;
-    }
-
-    .history-empty {
-      padding: 2.5rem 1.5rem; text-align: center;
-      font-size: 0.78rem; color: var(--muted); font-style: italic;
-      font-family: 'Libre Baskerville', serif;
-    }
-
-    .clear-btn {
-      font-size: 0.68rem; color: var(--muted); background: none;
-      border: none; cursor: pointer; letter-spacing: 0.05em;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .clear-btn:hover { color: var(--danger); }
-
-    .session-item-actions {
-      display: flex; align-items: center; gap: 0.4rem;
-      margin-left: 1rem; flex-shrink: 0;
-      opacity: 0; transition: opacity 0.15s;
-    }
-    #session-list li:hover .session-item-actions { opacity: 1; }
-
-    .session-continue-btn {
-      background: none; border: 1px solid #1a3a2a; cursor: pointer;
-      color: #2a6a4a; font-size: 0.65rem; line-height: 1;
-      padding: 5px 7px; border-radius: 6px;
-      font-family: 'JetBrains Mono', monospace;
-      transition: color 0.15s, background 0.15s, border-color 0.15s;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .session-continue-btn:hover {
-      color: var(--success); background: #0a1f14; border-color: #2a6a4a;
-    }
-
-    .session-delete-btn {
-      background: none; border: none; cursor: pointer;
-      color: #3a2a29; font-size: 0.9rem; line-height: 1;
-      padding: 5px 6px; border-radius: 6px;
-      transition: color 0.15s, background 0.15s;
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .session-delete-btn:hover { color: var(--danger); background: #1e0b0a; }
-
-    /* ── Storage Info Panel ── */
-    .info-toggle {
-      display: flex; align-items: center; justify-content: center; gap: 0.6rem;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); cursor: pointer;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.68rem; color: var(--muted); letter-spacing: 0.08em;
-      padding: 0.75rem 1.25rem; margin-top: 2rem; width: 100%;
-      transition: color 0.2s, border-color 0.2s;
-    }
-    .info-toggle:hover { color: var(--text); border-color: var(--muted); }
-    .info-icon {
-      width: 16px; height: 16px; border-radius: 50%;
-      border: 1px solid currentColor;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.6rem; flex-shrink: 0;
-    }
-
-    .info-panel {
-      background: #111; border: 1px solid var(--border);
-      border-radius: var(--radius); overflow: hidden;
-      max-height: 0; transition: max-height 0.4s ease, margin 0.3s;
-      margin-top: 0;
-    }
-    .info-panel.open { max-height: 600px; margin-top: 0.75rem; }
-    .info-panel-inner { padding: 1.4rem 1.5rem; }
-
-    .info-panel h4 {
-      font-family: 'Libre Baskerville', serif;
-      font-size: 0.82rem; font-style: italic;
-      color: var(--gold); margin-bottom: 1rem;
-    }
-    .info-row {
-      display: flex; gap: 1rem; margin-bottom: 0.9rem; align-items: flex-start;
-    }
-    .info-badge {
-      font-size: 0.62rem; background: var(--border);
-      color: var(--muted); border-radius: 4px;
-      padding: 2px 7px; white-space: nowrap; margin-top: 2px; flex-shrink: 0;
-      letter-spacing: 0.05em;
-    }
-    .info-badge.gold { background: #2a2010; color: var(--gold-dim); }
-    .info-desc {
-      font-size: 0.75rem; color: #7a7268; line-height: 1.6;
-    }
-    .info-desc strong { color: var(--muted); font-weight: 500; }
-    .info-key {
-      display: inline-block; font-size: 0.68rem;
-      background: #1a1a1a; color: var(--gold-dim);
-      border: 1px solid var(--border); border-radius: 4px;
-      padding: 1px 7px; font-family: 'JetBrains Mono', monospace;
-    }
-    .info-note {
-      margin-top: 0.8rem; padding-top: 0.8rem;
-      border-top: 1px solid var(--border);
-      font-size: 0.7rem; color: var(--muted); line-height: 1.5;
-      font-style: italic; font-family: 'Libre Baskerville', serif;
-    }
-
-    /* ── Learn More ── */
-    .learn-more-link {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.72rem; color: var(--muted);
-      text-decoration: none; letter-spacing: 0.06em;
-      border: 1px solid var(--border); border-radius: 99px;
-      padding: 4px 14px;
-      transition: color 0.2s, border-color 0.2s;
-      white-space: nowrap;
-    }
-    .learn-more-link:hover { color: var(--gold); border-color: var(--gold-dim); }
-
-    /* ── Footer ── */
-    .footer {
-      margin-top: 3rem; text-align: center;
-      font-family: 'Libre Baskerville', serif;
-      font-style: italic; font-size: 0.78rem; color: var(--muted);
-    }
-
-    /* ── Animations ── */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .wrap > * { animation: fadeIn 0.5s ease both; }
-    .site-header  { animation-delay: 0s; }
-    .clock-card   { animation-delay: 0.08s; }
-    .focus-card   { animation-delay: 0.16s; }
-    .history-card { animation-delay: 0.24s; }
-    .footer       { animation-delay: 0.32s; }
+    /* Animations */
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .wrap>*{animation:fadeIn .5s ease both}
+    .site-header{animation-delay:0s}.clock-card{animation-delay:.08s}.focus-card{animation-delay:.16s}.history-card{animation-delay:.24s}
   </style>
 </head>
 <body>
 <div class="wrap">
 
-  <!-- Header -->
   <header class="site-header">
     <span class="logo">Synced</span>
-    <div style="display:flex;align-items:center;gap:1rem;">
+    <div style="display:flex;align-items:center;gap:1rem">
       <span class="date-pill" id="date-label">—</span>
-      <a class="learn-more-link" href="https://www.padmalayarawal.com/synced" target="_blank" rel="noopener">
-        Learn more ↗
-      </a>
+      <a class="learn-more-link" href="https://www.padmalayarawal.com/synced" target="_blank" rel="noopener">Learn more ↗</a>
     </div>
   </header>
 
-  <!-- Day countdown -->
   <div class="clock-card">
     <button class="expand-btn" id="expand-day" title="Fullscreen">
-      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-        <path d="M1 5V1h4M9 1h4v4M13 9v4H9M5 13H1V9"/>
-      </svg>
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 5V1h4M9 1h4v4M13 9v4H9M5 13H1V9"/></svg>
     </button>
     <div class="clock-label">next daily reset in</div>
     <div id="day-timer">00:00:00</div>
-    <div class="progress-bar-wrap">
-      <div class="progress-bar-fill" id="day-progress" style="width:0%"></div>
-    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="day-progress" style="width:0%"></div></div>
     <div class="progress-label">
-      <span>midnight</span>
-      <span id="progress-pct">0% elapsed</span>
-      <span>midnight</span>
+      <span>midnight</span><span id="progress-pct">0% elapsed</span><span>midnight</span>
     </div>
   </div>
 
-  <!-- Focus session -->
   <p class="section-title">Focus Session</p>
   <div class="focus-card">
-    <!-- Idle state -->
     <div class="focus-idle" id="focus-idle">
-      <input
-        class="focus-input"
-        id="session-name-input"
-        type="text"
-        placeholder="What are you working on?"
-        maxlength="60"
-      />
+      <div class="mode-row">
+        <button class="mode-btn active" id="mode-up">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 10V2M2 6l4-4 4 4"/></svg>
+          Count Up
+        </button>
+        <button class="mode-btn" id="mode-down">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2v8M2 6l4 4 4-4"/></svg>
+          Countdown
+        </button>
+      </div>
+      <input class="focus-input" id="session-name-input" type="text" placeholder="What are you working on?" maxlength="60"
+        style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.85rem;padding:.75rem 1rem;outline:none;transition:border-color .2s" />
+      <div class="target-row" id="target-row" style="display:none">
+        <span class="target-label">Target</span>
+        <div class="target-inputs-col">
+          <div class="target-inputs">
+            <div class="target-field">
+              <input class="target-num" id="t-h" type="number" min="0" value="0" /><span class="target-unit">h</span>
+            </div>
+            <span class="target-sep">:</span>
+            <div class="target-field">
+              <input class="target-num" id="t-m" type="number" min="0" value="25" /><span class="target-unit">m</span>
+            </div>
+            <span class="target-sep">:</span>
+            <div class="target-field">
+              <input class="target-num" id="t-s" type="number" min="0" value="0" /><span class="target-unit">s</span>
+            </div>
+          </div>
+          <span class="target-error" id="target-error"></span>
+        </div>
+      </div>
       <button class="btn btn-gold" id="start-btn">Start</button>
     </div>
 
-    <!-- Active / paused state -->
     <div class="active-session" id="active-session">
       <div class="session-header">
         <div class="session-name-tag" id="active-name">—</div>
-        <div style="display:flex;align-items:center;gap:0.75rem;">
+        <div style="display:flex;align-items:center;gap:.75rem">
           <div class="session-status">
             <span class="status-dot" id="status-dot"></span>
             <span id="status-text">FOCUSING</span>
           </div>
-          <button class="expand-btn" id="expand-focus" title="Fullscreen" style="position:static;">
-            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-              <path d="M1 5V1h4M9 1h4v4M13 9v4H9M5 13H1V9"/>
-            </svg>
+          <button class="expand-btn" id="expand-focus" title="Fullscreen" style="position:static">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 5V1h4M9 1h4v4M13 9v4H9M5 13H1V9"/></svg>
           </button>
         </div>
       </div>
       <div id="focus-timer">00:00:00</div>
+      <div class="cd-progress-wrap" id="cd-progress-wrap" style="display:none">
+        <div class="cd-progress-fill" id="cd-progress-fill" style="width:100%"></div>
+      </div>
       <div class="session-controls">
         <button class="btn btn-outline" id="pause-btn">Pause</button>
         <button class="btn btn-danger"  id="stop-btn">Stop &amp; Save</button>
@@ -506,97 +261,55 @@
     </div>
   </div>
 
-  <!-- History -->
   <p class="section-title">Session History</p>
   <div class="history-card">
     <div class="history-head">
       <span class="history-count" id="history-count">0 sessions</span>
-      <button class="clear-btn" id="clear-btn">clear all</button>
+      <div class="clear-confirm-wrap">
+        <button class="clear-btn" id="clear-btn">clear all</button>
+        <div class="clear-confirm" id="clear-confirm" style="display:none">
+          <span class="clear-confirm-text">sure?</span>
+          <button class="clear-yes" id="clear-yes" type="button">yes</button>
+          <button class="clear-no"  id="clear-no"  type="button">no</button>
+        </div>
+      </div>
     </div>
-    <ul id="session-list">
-      <li><div class="history-empty">No sessions yet. Start focusing!</div></li>
-    </ul>
+    <ul id="session-list"><li><div class="history-empty">No sessions yet. Start focusing!</div></li></ul>
   </div>
 
-  <!-- Storage explainer -->
-  <button class="info-toggle" id="info-toggle">
+  <button class="info-toggle" id="info-toggle" type="button">
     <span class="info-icon">i</span>
     HOW &amp; WHERE ARE YOUR SESSIONS SAVED?
   </button>
   <div class="info-panel" id="info-panel">
     <div class="info-panel-inner">
       <h4>Your data never leaves your device</h4>
-
-      <div class="info-row">
-        <span class="info-badge gold">WHERE</span>
-        <div class="info-desc">
-          Sessions are saved in your <strong>browser's localStorage</strong> — a small key-value
-          store built into every modern browser. No server, no account, no internet needed.
-          The data lives in your browser's storage folder on your own computer or phone.
-        </div>
-      </div>
-
-      <div class="info-row">
-        <span class="info-badge gold">KEY</span>
-        <div class="info-desc">
-          Everything is stored under a single key: <span class="info-key">synced_sessions</span>.
-          The value is a <strong>JSON array</strong> — each session is an object with
-          <span class="info-key">name</span>, <span class="info-key">duration</span> (in seconds),
-          and <span class="info-key">date</span> (ISO timestamp).
-        </div>
-      </div>
-
-      <div class="info-row">
-        <span class="info-badge gold">HOW</span>
-        <div class="info-desc">
-          When you hit <strong>Stop &amp; Save</strong>, the app calls
-          <span class="info-key">localStorage.setItem()</span> to write the updated array.
-          On every page load, <span class="info-key">localStorage.getItem()</span> reads it back
-          and rebuilds the list — no login, no sync required.
-        </div>
-      </div>
-
-      <div class="info-row">
-        <span class="info-badge">LIMITS</span>
-        <div class="info-desc">
-          localStorage is <strong>origin-scoped</strong> — only this exact website can read its
-          own data. Storage cap is typically <strong>5 MB per origin</strong>, which is enough for
-          tens of thousands of sessions. Data persists until you clear your browser storage or
-          use the delete options above.
-        </div>
-      </div>
-
-      <div class="info-row">
-        <span class="info-badge">PRIVACY</span>
-        <div class="info-desc">
-          Nothing is transmitted anywhere. No analytics, no tracking, no cloud.
-          Your session names and durations exist only in your browser.
-        </div>
-      </div>
-
-      <div class="info-note">
-        To inspect it yourself: open DevTools → Application → Local Storage → this site's origin.
-        You'll see the raw JSON exactly as it's stored.
-      </div>
+      <div class="info-row"><span class="info-badge gold">WHERE</span><div class="info-desc">Stored in your browser's <strong>localStorage</strong> — a built-in key-value store. No server, no account, no internet required.</div></div>
+      <div class="info-row"><span class="info-badge">KEY</span><div class="info-desc">Everything lives under one key: <span class="info-key">synced_sessions</span> as a JSON array. Each session stores <strong>name</strong>, <strong>duration</strong>, <strong>date</strong>, <strong>mode</strong>, and <strong>targetSecs</strong>.</div></div>
+      <div class="info-row"><span class="info-badge">HOW</span><div class="info-desc"><strong>setItem()</strong> writes on save, <strong>getItem()</strong> reads on every page load. Deleting splices the array and re-saves.</div></div>
+      <div class="info-row"><span class="info-badge">LIMITS</span><div class="info-desc">Origin-scoped, ~5 MB cap, survives browser restarts until you explicitly clear it.</div></div>
+      <div class="info-row"><span class="info-badge">PRIVACY</span><div class="info-desc">Nothing is transmitted anywhere. No analytics, no tracking, no cloud.</div></div>
+      <div class="info-note">To inspect: DevTools → Application → Local Storage → this origin.</div>
     </div>
   </div>
 
   <div class="footer">The best present of life is PRESENT :)</div>
-
 </div>
 
-<!-- Fullscreen: Day Timer (outside wrap, directly in body) -->
+<div class="ping-overlay" id="ping-overlay">
+  <div class="ping-icon">🔔</div>
+  <div class="ping-title">Time's up!</div>
+  <div class="ping-sub" id="ping-session-name"></div>
+</div>
+
 <div class="fs-overlay" id="fs-day">
   <button class="fs-close" id="fs-day-close" type="button">✕ &nbsp;exit fullscreen</button>
   <div class="fs-label">next daily reset in</div>
   <div class="fs-timer" id="fs-day-timer">00:00:00</div>
-  <div class="fs-progress-wrap">
-    <div class="fs-progress-fill" id="fs-day-progress" style="width:0%"></div>
-  </div>
+  <div class="fs-progress-wrap"><div class="fs-progress-fill" id="fs-day-progress" style="width:0%"></div></div>
   <div class="fs-sub" id="fs-day-pct">0% of today elapsed</div>
 </div>
 
-<!-- Fullscreen: Focus Session (outside wrap, directly in body) -->
 <div class="fs-overlay" id="fs-focus">
   <button class="fs-close" id="fs-focus-close" type="button">✕ &nbsp;exit fullscreen</button>
   <div class="fs-label" id="fs-focus-label">focusing</div>
@@ -608,332 +321,359 @@
 </div>
 
 <script>
-/* ── Constants ── */
-const STORAGE_KEY = 'synced_sessions';
+const STORAGE_KEY    = 'synced_sessions';
 const SECONDS_IN_DAY = 86400;
 
-/* ── State ── */
-let focusStart   = null;
-let focusPaused  = false;
-let pausedAt     = null;
-let focusElapsed = 0;
-let focusName    = '';
-let tickInterval = null;
-let continueIndex = null;   // index of session being continued (null = new session)
+let focusStart=null, focusPaused=false, pausedAt=0, focusElapsed=0;
+let focusName='', tickInterval=null, continueIndex=null;
+let focusMode='up', targetSecs=0;
+let fsDay=false, fsFocus=false;
 
 /* ── Helpers ── */
-function pad(n) { return String(n).padStart(2, '0'); }
-
+const pad = n => String(n).padStart(2,'0');
 function fmtDuration(sec) {
-  const h = Math.floor(sec / 3600);
-  const m = Math.floor((sec % 3600) / 60);
-  const s = sec % 60;
-  return h > 0
-    ? `${pad(h)}:${pad(m)}:${pad(s)}`
-    : `${pad(m)}:${pad(s)}`;
+  sec = Math.max(0, Math.floor(sec));
+  const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
+  return h>0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
 }
-
 function fmtDate(iso) {
-  const d = new Date(iso);
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-       + ' · ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  const d=new Date(iso);
+  return d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})
+        +' · '+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
+}
+function escHtml(str) {
+  return String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-/* ── Day countdown ── */
+/* ── Day clock ── */
 function updateDayClock() {
-  const now      = new Date();
-  const tomorrow = new Date(now);
-  tomorrow.setHours(24, 0, 0, 0);
-  const diff = Math.floor((tomorrow - now) / 1000);          // seconds left
-  const elapsed = SECONDS_IN_DAY - diff;
-  const pct = ((elapsed / SECONDS_IN_DAY) * 100).toFixed(1);
-
-  const h = Math.floor(diff / 3600);
-  const m = Math.floor((diff % 3600) / 60);
-  const s = diff % 60;
-  document.getElementById('day-timer').textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
-  document.getElementById('day-progress').style.width = pct + '%';
-  document.getElementById('progress-pct').textContent = pct + '% elapsed';
-
-  // Date pill
-  document.getElementById('date-label').textContent =
-    now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  const now=new Date(), tom=new Date(now); tom.setHours(24,0,0,0);
+  const diff=Math.floor((tom-now)/1000), elapsed=SECONDS_IN_DAY-diff;
+  const pct=((elapsed/SECONDS_IN_DAY)*100).toFixed(1);
+  const h=Math.floor(diff/3600), m=Math.floor((diff%3600)/60), s=diff%60;
+  document.getElementById('day-timer').textContent    = `${pad(h)}:${pad(m)}:${pad(s)}`;
+  document.getElementById('day-progress').style.width = pct+'%';
+  document.getElementById('progress-pct').textContent = pct+'% elapsed';
+  document.getElementById('date-label').textContent   = now.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+  fitAllTimers();
+  if (fsDay) {
+    document.getElementById('fs-day-timer').textContent    = `${pad(h)}:${pad(m)}:${pad(s)}`;
+    document.getElementById('fs-day-progress').style.width = pct+'%';
+    document.getElementById('fs-day-pct').textContent      = pct+'% of today elapsed';
+  }
 }
 
-/* ── Focus timer tick ── */
+/* ── Mode ── */
+function setMode(m) {
+  focusMode=m;
+  document.getElementById('mode-up').classList.toggle('active',m==='up');
+  document.getElementById('mode-down').classList.toggle('active',m==='down');
+  document.getElementById('target-row').style.display = m==='down' ? 'flex' : 'none';
+}
+document.getElementById('mode-up').addEventListener('click',()=>setMode('up'));
+document.getElementById('mode-down').addEventListener('click',()=>setMode('down'));
+
+/* ── Validation ── */
+function showTargetError(ids, msg) {
+  ids.forEach(id => {
+    const el=document.getElementById(id);
+    el.classList.add('input-error');
+    el.classList.remove('input-shake');
+    void el.offsetWidth;
+    el.classList.add('input-shake');
+    el.addEventListener('animationend',()=>el.classList.remove('input-shake'),{once:true});
+  });
+  const errEl=document.getElementById('target-error');
+  errEl.textContent=msg; errEl.style.opacity='1';
+  clearTimeout(errEl._t);
+  errEl._t=setTimeout(()=>{
+    errEl.style.opacity='0';
+    ids.forEach(id=>document.getElementById(id).classList.remove('input-error'));
+  },2500);
+}
+function validateTargetInputs() {
+  const bad=[];
+  ['t-m','t-s'].forEach(id=>{
+    const v=parseInt(document.getElementById(id).value,10);
+    if(!isNaN(v)&&v>59) bad.push(id);
+  });
+  if(bad.length){ showTargetError(bad,"Minutes and seconds can't exceed 59"); return false; }
+  return true;
+}
+['t-m','t-s'].forEach(id=>{
+  const el=document.getElementById(id);
+  el.addEventListener('input',()=>{
+    if(parseInt(el.value,10)<=59){
+      el.classList.remove('input-error');
+      if(!document.querySelector('.input-error')) document.getElementById('target-error').style.opacity='0';
+    }
+  });
+  el.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){
+      e.preventDefault();
+      parseInt(el.value,10)>59 ? showTargetError([id],"Can't exceed 59") : document.getElementById('start-btn').click();
+    }
+  });
+});
+['t-h','t-m','t-s'].forEach(id=>{
+  document.getElementById(id).addEventListener('blur',e=>{
+    if(e.target.value===''||isNaN(parseInt(e.target.value,10))) e.target.value=0;
+  });
+});
+
+/* ── Focus tick ── */
 function focusTick() {
-  if (focusPaused) return;
-  focusElapsed = Math.floor((Date.now() - focusStart) / 1000) + (pausedAt || 0);
-  document.getElementById('focus-timer').textContent = fmtDuration(focusElapsed);
+  if(focusPaused) return;
+  focusElapsed=Math.floor((Date.now()-focusStart)/1000)+pausedAt;
+  if(focusMode==='down') {
+    const remaining=Math.max(0,targetSecs-focusElapsed);
+    const pct=targetSecs>0?(remaining/targetSecs*100).toFixed(1):0;
+    document.getElementById('focus-timer').textContent=''+fmtDuration(remaining);
+    document.getElementById('cd-progress-fill').style.width=pct+'%';
+    if(fsFocus){ document.getElementById('fs-focus-timer').textContent=fmtDuration(remaining); syncFsFocusDot(); }
+    if(remaining===0){
+      clearInterval(tickInterval); tickInterval=null;
+      showPing();
+      saveSession({name:focusName,duration:0,date:new Date().toISOString(),mode:'down',targetSecs});
+      renderHistory(); closeFsFocus(); resetFocusState(); showIdle();
+    }
+  } else {
+    document.getElementById('focus-timer').textContent=fmtDuration(focusElapsed);
+    if(fsFocus){ document.getElementById('fs-focus-timer').textContent=fmtDuration(focusElapsed); syncFsFocusDot(); }
+  }
+  fitAllTimers();
 }
 
-/* ── UI state toggle ── */
+/* ── UI state ── */
 function showActive(name) {
-  document.getElementById('focus-idle').style.display    = 'none';
-  document.getElementById('active-session').style.display = 'block';
-  document.getElementById('active-name').textContent = name;
+  document.getElementById('focus-idle').style.display='none';
+  document.getElementById('active-session').style.display='block';
+  document.getElementById('active-name').textContent=name;
+  document.getElementById('cd-progress-wrap').style.display=focusMode==='down'?'block':'none';
 }
 function showIdle() {
-  document.getElementById('focus-idle').style.display    = 'flex';
-  document.getElementById('active-session').style.display = 'none';
-  document.getElementById('focus-timer').textContent = '00:00:00';
-  document.getElementById('session-name-input').value = '';
+  document.getElementById('focus-idle').style.display='flex';
+  document.getElementById('active-session').style.display='none';
+  document.getElementById('focus-timer').textContent='00:00:00';
+  document.getElementById('session-name-input').value='';
+}
+function resetFocusState(){ focusStart=null;focusPaused=false;pausedAt=0;focusElapsed=0;continueIndex=null; }
+function updateStatusDot(paused) {
+  document.getElementById('status-dot').classList.toggle('paused',paused);
+  document.getElementById('status-text').textContent=paused?'PAUSED':'FOCUSING';
+  document.getElementById('pause-btn').textContent=paused?'Resume':'Pause';
+  syncFsFocusDot();
 }
 
 /* ── Start ── */
-document.getElementById('start-btn').addEventListener('click', () => {
-  const raw = document.getElementById('session-name-input').value.trim();
-  focusName     = raw || 'Untitled Session';
-  focusStart    = Date.now();
-  focusPaused   = false;
-  pausedAt      = 0;
-  focusElapsed  = 0;
-  continueIndex = null;
-
-  showActive(focusName);
-  updateStatusDot(false);
-  tickInterval = setInterval(focusTick, 1000);
-  focusTick();
+document.getElementById('start-btn').addEventListener('click',()=>{
+  if(focusMode==='down'){
+    if(!validateTargetInputs()) return;
+    const h=parseInt(document.getElementById('t-h').value,10)||0;
+    const m=parseInt(document.getElementById('t-m').value,10)||0;
+    const s=parseInt(document.getElementById('t-s').value,10)||0;
+    targetSecs=h*3600+m*60+s;
+    if(targetSecs<=0){ showTargetError(['t-m'],'Please set a target time'); return; }
+    document.getElementById('focus-timer').textContent=fmtDuration(targetSecs);
+  }
+  focusName=document.getElementById('session-name-input').value.trim()||'Untitled Session';
+  focusStart=Date.now(); focusPaused=false; pausedAt=0; focusElapsed=0; continueIndex=null;
+  showActive(focusName); updateStatusDot(false);
+  tickInterval=setInterval(focusTick,1000); focusTick();
 });
 
-/* ── Pause / Resume ── */
-document.getElementById('pause-btn').addEventListener('click', () => {
-  if (!focusPaused) {
-    // pause
-    focusPaused = true;
-    pausedAt    = focusElapsed;
-    focusStart  = null;
-    document.getElementById('pause-btn').textContent = 'Resume';
-    updateStatusDot(true);
-  } else {
-    // resume
-    focusPaused = false;
-    focusStart  = Date.now();
-    document.getElementById('pause-btn').textContent = 'Pause';
-    updateStatusDot(false);
-  }
+/* ── Pause ── */
+document.getElementById('pause-btn').addEventListener('click',()=>{
+  if(!focusPaused){ focusPaused=true; pausedAt=focusElapsed; focusStart=null; updateStatusDot(true); }
+  else            { focusPaused=false; focusStart=Date.now(); updateStatusDot(false); }
 });
 
 /* ── Stop & Save ── */
-document.getElementById('stop-btn').addEventListener('click', () => {
-  clearInterval(tickInterval);
-  tickInterval = null;
-
-  if (focusElapsed > 0) {
-    const sessions = loadSessions();
-    if (continueIndex !== null && sessions[continueIndex]) {
-      // Update the existing session's duration
-      sessions[continueIndex].duration = focusElapsed;
-      sessions[continueIndex].date     = new Date().toISOString();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
-    } else {
-      saveSession({ name: focusName, duration: focusElapsed, date: new Date().toISOString() });
-    }
+document.getElementById('stop-btn').addEventListener('click',()=>{
+  clearInterval(tickInterval); tickInterval=null;
+  const remaining=focusMode==='down'?Math.max(0,targetSecs-focusElapsed):0;
+  const entry={
+    name:focusName, duration:focusMode==='down'?remaining:focusElapsed,
+    date:new Date().toISOString(), mode:focusMode, targetSecs:focusMode==='down'?targetSecs:0
+  };
+  if(focusElapsed>0||focusMode==='down'){
+    const sessions=loadSessions();
+    if(continueIndex!==null&&sessions[continueIndex]){
+      sessions[continueIndex]={...sessions[continueIndex],...entry};
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(sessions));
+    } else { saveSession(entry); }
     renderHistory();
   }
-
-  focusStart    = null;
-  focusPaused   = false;
-  pausedAt      = 0;
-  focusElapsed  = 0;
-  continueIndex = null;
-  showIdle();
+  resetFocusState(); showIdle();
 });
 
-/* ── Status dot ── */
-function updateStatusDot(paused) {
-  const dot  = document.getElementById('status-dot');
-  const text = document.getElementById('status-text');
-  const btn  = document.getElementById('pause-btn');
-  if (paused) {
-    dot.classList.add('paused');
-    text.textContent = 'PAUSED';
-    btn.textContent  = 'Resume';
+/* ── Enter to start ── */
+document.getElementById('session-name-input').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('start-btn').click(); });
+
+/* ── Ping ── */
+function playPing() {
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    [523.25,659.25,783.99,1046.5].forEach((freq,i)=>{
+      const osc=ctx.createOscillator(), gain=ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type='sine'; osc.frequency.value=freq;
+      const t0=ctx.currentTime+i*.18, t1=t0+5-i*.18;
+      gain.gain.setValueAtTime(0,t0);
+      gain.gain.linearRampToValueAtTime(.18,t0+.06);
+      gain.gain.exponentialRampToValueAtTime(.001,t1);
+      osc.start(t0); osc.stop(t1);
+    });
+  }catch(e){}
+}
+function showPing(){
+  document.getElementById('ping-session-name').textContent=focusName;
+  const o=document.getElementById('ping-overlay');
+  o.classList.add('visible'); playPing();
+  setTimeout(()=>o.classList.remove('visible'),5200);
+}
+
+/* ── Storage ── */
+function loadSessions(){ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); }
+function saveSession(s){ const l=loadSessions(); l.unshift(s); localStorage.setItem(STORAGE_KEY,JSON.stringify(l)); }
+function clearSessions(){ localStorage.removeItem(STORAGE_KEY); renderHistory(); }
+function deleteSession(i){ const l=loadSessions(); l.splice(i,1); localStorage.setItem(STORAGE_KEY,JSON.stringify(l)); renderHistory(); }
+
+/* ── Continue ── */
+function continueSession(index){
+  if(tickInterval) return;
+  const sessions=loadSessions(), s=sessions[index];
+  if(!s) return;
+  const savedMode=s.mode||'up';
+  setMode(savedMode);
+  focusName=s.name; continueIndex=index; focusPaused=false;
+  if(savedMode==='down'){
+    targetSecs=s.targetSecs||s.duration;
+    const elapsed=Math.max(0,targetSecs-s.duration);
+    pausedAt=elapsed; focusElapsed=elapsed;
+    document.getElementById('focus-timer').textContent=fmtDuration(s.duration);
   } else {
-    dot.classList.remove('paused');
-    text.textContent = 'FOCUSING';
-    btn.textContent  = 'Pause';
+    pausedAt=s.duration; focusElapsed=s.duration;
+    document.getElementById('focus-timer').textContent=fmtDuration(s.duration);
   }
-  syncFsFocus();
-}
-
-/* ── Local storage ── */
-function loadSessions()  { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-function saveSession(s)  {
-  const list = loadSessions();
-  list.unshift(s);                          // newest first
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-}
-function clearSessions() {
-  localStorage.removeItem(STORAGE_KEY);
-  renderHistory();
-}
-
-/* ── Continue a previous session ── */
-function continueSession(index) {
-  if (tickInterval) return; // already running
-  const sessions = loadSessions();
-  const s = sessions[index];
-  if (!s) return;
-
-  focusName     = s.name;
-  pausedAt      = s.duration;   // start elapsed from where it left off
-  focusStart    = Date.now();
-  focusPaused   = false;
-  focusElapsed  = s.duration;
-  continueIndex = index;
-
-  showActive(focusName);
-  updateStatusDot(false);
-  tickInterval = setInterval(focusTick, 1000);
-  focusTick();
-
-  // Scroll focus card into view
-  document.querySelector('.focus-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  focusStart=Date.now();
+  showActive(focusName); updateStatusDot(false);
+  tickInterval=setInterval(focusTick,1000); focusTick();
+  document.querySelector('.focus-card').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
 /* ── Render history ── */
-function renderHistory() {
-  const sessions = loadSessions();
-  const list     = document.getElementById('session-list');
-  const counter  = document.getElementById('history-count');
-
-  counter.textContent = sessions.length === 1 ? '1 session' : `${sessions.length} sessions`;
-
-  if (sessions.length === 0) {
-    list.innerHTML = '<li><div class="history-empty">No sessions yet. Start focusing!</div></li>';
-    return;
-  }
-
-  list.innerHTML = sessions.map((s, i) => `
-    <li>
-      <div class="session-item-name">${escHtml(s.name)}</div>
+function renderHistory(){
+  const sessions=loadSessions();
+  const list=document.getElementById('session-list');
+  document.getElementById('history-count').textContent=sessions.length===1?'1 session':`${sessions.length} sessions`;
+  if(!sessions.length){ list.innerHTML='<li><div class="history-empty">No sessions yet. Start focusing!</div></li>'; return; }
+  list.innerHTML=sessions.map((s,i)=>`
+    <li data-index="${i}">
+      <div class="session-item-name-wrap">
+        <span class="session-item-name" id="sname-${i}">${escHtml(s.name)}</span>
+        <input class="session-name-edit" id="sedit-${i}" type="text" value="${escHtml(s.name)}" maxlength="60" style="display:none" />
+      </div>
       <div class="session-item-meta">
         <div class="session-item-dur">${fmtDuration(s.duration)}</div>
         <div class="session-item-date">${fmtDate(s.date)}</div>
       </div>
       <div class="session-item-actions">
-        <button class="session-continue-btn" data-index="${i}" title="Continue this session"><svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor"><path d="M2 1.5l9 4.5-9 4.5z"/></svg></button>
-        <button class="session-delete-btn"   data-index="${i}" title="Delete this session"><svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <button class="session-edit-btn"     data-index="${i}" title="Edit name"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 1.5l2 2-7 7H1.5v-2l7-7z"/></svg></button>
+        <button class="session-continue-btn" data-index="${i}" title="Continue"><svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor"><path d="M2 1.5l9 4.5-9 4.5z"/></svg></button>
+        <button class="session-delete-btn"   data-index="${i}" title="Delete"><svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
       </div>
-    </li>
-  `).join('');
+    </li>`).join('');
 
-  list.querySelectorAll('.session-continue-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
+  list.querySelectorAll('.session-edit-btn').forEach(btn=>{
+    btn.addEventListener('click',e=>{
       e.stopPropagation();
-      continueSession(Number(btn.dataset.index));
+      const i=Number(btn.dataset.index);
+      const nameEl=document.getElementById(`sname-${i}`);
+      const editEl=document.getElementById(`sedit-${i}`);
+      const li=btn.closest('li');
+      if(editEl.style.display!=='none'){
+        const newName=editEl.value.trim()||nameEl.textContent;
+        const sessions=loadSessions();
+        if(sessions[i]){ sessions[i].name=newName; localStorage.setItem(STORAGE_KEY,JSON.stringify(sessions)); }
+        renderHistory();
+      } else {
+        nameEl.style.display='none'; editEl.style.display='inline-block';
+        li.classList.add('editing'); editEl.focus(); editEl.select();
+        btn.innerHTML='<svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 6l3 3 5-5"/></svg>';
+      }
     });
   });
-
-  list.querySelectorAll('.session-delete-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      deleteSession(Number(btn.dataset.index));
+  list.querySelectorAll('.session-name-edit').forEach(input=>{
+    input.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){ e.preventDefault(); document.querySelector(`.session-edit-btn[data-index="${input.id.replace('sedit-','')}"]`).click(); }
+      if(e.key==='Escape') renderHistory();
     });
+    input.addEventListener('click',e=>e.stopPropagation());
   });
+  list.querySelectorAll('.session-continue-btn').forEach(btn=>btn.addEventListener('click',e=>{ e.stopPropagation(); continueSession(Number(btn.dataset.index)); }));
+  list.querySelectorAll('.session-delete-btn').forEach(btn=>btn.addEventListener('click',e=>{ e.stopPropagation(); deleteSession(Number(btn.dataset.index)); }));
 }
 
-function escHtml(str) {
-  return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* ── Clear all ── */
+document.getElementById('clear-btn').addEventListener('click',()=>{ document.getElementById('clear-btn').style.display='none'; document.getElementById('clear-confirm').style.display='flex'; });
+document.getElementById('clear-no').addEventListener('click',()=>{ document.getElementById('clear-btn').style.display=''; document.getElementById('clear-confirm').style.display='none'; });
+document.getElementById('clear-yes').addEventListener('click',()=>{ clearSessions(); document.getElementById('clear-btn').style.display=''; document.getElementById('clear-confirm').style.display='none'; });
+
+/* ── Info panel ── */
+document.getElementById('info-toggle').addEventListener('click',()=>document.getElementById('info-panel').classList.toggle('open'));
+
+/* ── Fullscreen ── */
+function syncFsFocusDot(){
+  document.getElementById('fs-status-dot').classList.toggle('paused',focusPaused);
+  document.getElementById('fs-status-text').textContent=focusPaused?'PAUSED':'FOCUSING';
 }
-
-function deleteSession(index) {
-  const list = loadSessions();
-  list.splice(index, 1);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-  renderHistory();
+function openFsDay()  { fsDay=true;  document.getElementById('fs-day').classList.add('visible'); }
+function closeFsDay() { fsDay=false; document.getElementById('fs-day').classList.remove('visible'); }
+function openFsFocus(){
+  if(!tickInterval) return;
+  fsFocus=true;
+  document.getElementById('fs-focus').classList.add('visible');
+  document.getElementById('fs-focus-label').textContent=focusName||'focusing';
+  document.getElementById('fs-focus-timer').textContent=focusMode==='down'?fmtDuration(Math.max(0,targetSecs-focusElapsed)):fmtDuration(focusElapsed);
+  syncFsFocusDot();
 }
+function closeFsFocus(){ fsFocus=false; document.getElementById('fs-focus').classList.remove('visible'); }
 
-document.getElementById('clear-btn').addEventListener('click', () => {
-  if (confirm('Clear all saved sessions?')) clearSessions();
-});
+document.getElementById('expand-day').addEventListener('click',openFsDay);
+document.getElementById('fs-day-close').addEventListener('click',closeFsDay);
+document.getElementById('expand-focus').addEventListener('click',openFsFocus);
+document.getElementById('fs-focus-close').addEventListener('click',closeFsFocus);
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeFsDay(); closeFsFocus(); } });
 
-/* ── Info panel toggle ── */
-document.getElementById('info-toggle').addEventListener('click', () => {
-  document.getElementById('info-panel').classList.toggle('open');
-});
-
-/* ── Allow Enter key to start ── */
-document.getElementById('session-name-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('start-btn').click();
-});
-
-/* ── Fullscreen logic ── */
-let fsDay   = false;
-let fsFocus = false;
-
-function openFsDay() {
-  fsDay = true;
-  document.getElementById('fs-day').classList.add('visible');
-  syncFsDay();
-}
-function closeFsDay() {
-  fsDay = false;
-  document.getElementById('fs-day').classList.remove('visible');
-}
-
-function openFsFocus() {
-  fsFocus = true;
-  const overlay = document.getElementById('fs-focus');
-  overlay.classList.add('visible');
-  document.getElementById('fs-focus-label').textContent = focusName || 'focusing';
-  syncFsFocus();
-}
-function closeFsFocus() {
-  fsFocus = false;
-  document.getElementById('fs-focus').classList.remove('visible');
-}
-
-function syncFsDay() {
-  if (!fsDay) return;
-  const now      = new Date();
-  const tomorrow = new Date(now);
-  tomorrow.setHours(24, 0, 0, 0);
-  const diff    = Math.floor((tomorrow - now) / 1000);
-  const elapsed = SECONDS_IN_DAY - diff;
-  const pct     = ((elapsed / SECONDS_IN_DAY) * 100).toFixed(1);
-  const h = Math.floor(diff / 3600);
-  const m = Math.floor((diff % 3600) / 60);
-  const s = diff % 60;
-  document.getElementById('fs-day-timer').textContent    = `${pad(h)}:${pad(m)}:${pad(s)}`;
-  document.getElementById('fs-day-progress').style.width = pct + '%';
-  document.getElementById('fs-day-pct').textContent      = pct + '% of today elapsed';
-}
-
-function syncFsFocus() {
-  if (!fsFocus) return;
-  document.getElementById('fs-focus-timer').textContent = fmtDuration(focusElapsed);
-  const dot  = document.getElementById('fs-status-dot');
-  const text = document.getElementById('fs-status-text');
-  if (focusPaused) {
-    dot.classList.add('paused');
-    text.textContent = 'PAUSED';
-  } else {
-    dot.classList.remove('paused');
-    text.textContent = 'FOCUSING';
+/* ── Fit timer to container ── */
+function fitTimer(el) {
+  if (!el) return;
+  el.style.fontSize = '';          // reset
+  const parent = el.parentElement;
+  const maxW   = parent.clientWidth;
+  let size = parseInt(window.getComputedStyle(el).fontSize);
+  // shrink until it fits
+  while (el.scrollWidth > maxW && size > 12) {
+    size -= 1;
+    el.style.fontSize = size + 'px';
   }
 }
 
-// Sync overlays every second
-setInterval(() => { syncFsDay(); syncFsFocus(); }, 1000);
+function fitAllTimers() {
+  fitTimer(document.getElementById('day-timer'));
+  fitTimer(document.getElementById('focus-timer'));
+  fitTimer(document.getElementById('fs-day-timer'));
+  fitTimer(document.getElementById('fs-focus-timer'));
+}
 
-document.getElementById('expand-day').addEventListener('click', openFsDay);
-document.getElementById('fs-day-close').addEventListener('click', closeFsDay);
-document.getElementById('expand-focus').addEventListener('click', () => {
-  if (tickInterval) openFsFocus();
-});
-document.getElementById('fs-focus-close').addEventListener('click', closeFsFocus);
-
-// ESC key
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeFsDay(); closeFsFocus(); }
-});
+window.addEventListener('resize', fitAllTimers);
 
 /* ── Init ── */
 updateDayClock();
-setInterval(updateDayClock, 1000);
+setInterval(updateDayClock,1000);
 renderHistory();
+fitAllTimers();
 </script>
 </body>
 </html>
