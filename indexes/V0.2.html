@@ -241,6 +241,94 @@
     }
     .clear-btn:hover { color: var(--danger); }
 
+    .session-item-actions {
+      display: flex; align-items: center; gap: 0.4rem;
+      margin-left: 1rem; flex-shrink: 0;
+      opacity: 0; transition: opacity 0.15s;
+    }
+    #session-list li:hover .session-item-actions { opacity: 1; }
+
+    .session-continue-btn {
+      background: none; border: 1px solid #1a3a2a; cursor: pointer;
+      color: #2a6a4a; font-size: 0.65rem; line-height: 1;
+      padding: 5px 7px; border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      transition: color 0.15s, background 0.15s, border-color 0.15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .session-continue-btn:hover {
+      color: var(--success); background: #0a1f14; border-color: #2a6a4a;
+    }
+
+    .session-delete-btn {
+      background: none; border: none; cursor: pointer;
+      color: #3a2a29; font-size: 0.9rem; line-height: 1;
+      padding: 5px 6px; border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .session-delete-btn:hover { color: var(--danger); background: #1e0b0a; }
+
+    /* ── Storage Info Panel ── */
+    .info-toggle {
+      display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem; color: var(--muted); letter-spacing: 0.08em;
+      padding: 0.75rem 1.25rem; margin-top: 2rem; width: 100%;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .info-toggle:hover { color: var(--text); border-color: var(--muted); }
+    .info-icon {
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 1px solid currentColor;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; flex-shrink: 0;
+    }
+
+    .info-panel {
+      background: #111; border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+      max-height: 0; transition: max-height 0.4s ease, margin 0.3s;
+      margin-top: 0;
+    }
+    .info-panel.open { max-height: 600px; margin-top: 0.75rem; }
+    .info-panel-inner { padding: 1.4rem 1.5rem; }
+
+    .info-panel h4 {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 0.82rem; font-style: italic;
+      color: var(--gold); margin-bottom: 1rem;
+    }
+    .info-row {
+      display: flex; gap: 1rem; margin-bottom: 0.9rem; align-items: flex-start;
+    }
+    .info-badge {
+      font-size: 0.62rem; background: var(--border);
+      color: var(--muted); border-radius: 4px;
+      padding: 2px 7px; white-space: nowrap; margin-top: 2px; flex-shrink: 0;
+      letter-spacing: 0.05em;
+    }
+    .info-badge.gold { background: #2a2010; color: var(--gold-dim); }
+    .info-desc {
+      font-size: 0.75rem; color: #7a7268; line-height: 1.6;
+    }
+    .info-desc strong { color: var(--muted); font-weight: 500; }
+    .info-key {
+      display: inline-block; font-size: 0.68rem;
+      background: #1a1a1a; color: var(--gold-dim);
+      border: 1px solid var(--border); border-radius: 4px;
+      padding: 1px 7px; font-family: 'JetBrains Mono', monospace;
+    }
+    .info-note {
+      margin-top: 0.8rem; padding-top: 0.8rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.7rem; color: var(--muted); line-height: 1.5;
+      font-style: italic; font-family: 'Libre Baskerville', serif;
+    }
+
     /* ── Learn More ── */
     .learn-more-link {
       font-family: 'JetBrains Mono', monospace;
@@ -345,6 +433,69 @@
     </ul>
   </div>
 
+  <!-- Storage explainer -->
+  <button class="info-toggle" id="info-toggle">
+    <span class="info-icon">i</span>
+    HOW &amp; WHERE ARE YOUR SESSIONS SAVED?
+  </button>
+  <div class="info-panel" id="info-panel">
+    <div class="info-panel-inner">
+      <h4>Your data never leaves your device</h4>
+
+      <div class="info-row">
+        <span class="info-badge gold">WHERE</span>
+        <div class="info-desc">
+          Sessions are saved in your <strong>browser's localStorage</strong> — a small key-value
+          store built into every modern browser. No server, no account, no internet needed.
+          The data lives in your browser's storage folder on your own computer or phone.
+        </div>
+      </div>
+
+      <div class="info-row">
+        <span class="info-badge gold">KEY</span>
+        <div class="info-desc">
+          Everything is stored under a single key: <span class="info-key">synced_sessions</span>.
+          The value is a <strong>JSON array</strong> — each session is an object with
+          <span class="info-key">name</span>, <span class="info-key">duration</span> (in seconds),
+          and <span class="info-key">date</span> (ISO timestamp).
+        </div>
+      </div>
+
+      <div class="info-row">
+        <span class="info-badge gold">HOW</span>
+        <div class="info-desc">
+          When you hit <strong>Stop &amp; Save</strong>, the app calls
+          <span class="info-key">localStorage.setItem()</span> to write the updated array.
+          On every page load, <span class="info-key">localStorage.getItem()</span> reads it back
+          and rebuilds the list — no login, no sync required.
+        </div>
+      </div>
+
+      <div class="info-row">
+        <span class="info-badge">LIMITS</span>
+        <div class="info-desc">
+          localStorage is <strong>origin-scoped</strong> — only this exact website can read its
+          own data. Storage cap is typically <strong>5 MB per origin</strong>, which is enough for
+          tens of thousands of sessions. Data persists until you clear your browser storage or
+          use the delete options above.
+        </div>
+      </div>
+
+      <div class="info-row">
+        <span class="info-badge">PRIVACY</span>
+        <div class="info-desc">
+          Nothing is transmitted anywhere. No analytics, no tracking, no cloud.
+          Your session names and durations exist only in your browser.
+        </div>
+      </div>
+
+      <div class="info-note">
+        To inspect it yourself: open DevTools → Application → Local Storage → this site's origin.
+        You'll see the raw JSON exactly as it's stored.
+      </div>
+    </div>
+  </div>
+
   <div class="footer">The best present of life is PRESENT :)</div>
 </div>
 
@@ -354,12 +505,13 @@ const STORAGE_KEY = 'synced_sessions';
 const SECONDS_IN_DAY = 86400;
 
 /* ── State ── */
-let focusStart   = null;   // Date when current session started
+let focusStart   = null;
 let focusPaused  = false;
-let pausedAt     = null;   // elapsed seconds when paused
-let focusElapsed = 0;      // total elapsed seconds (live)
+let pausedAt     = null;
+let focusElapsed = 0;
 let focusName    = '';
 let tickInterval = null;
+let continueIndex = null;   // index of session being continued (null = new session)
 
 /* ── Helpers ── */
 function pad(n) { return String(n).padStart(2, '0'); }
@@ -423,11 +575,12 @@ function showIdle() {
 /* ── Start ── */
 document.getElementById('start-btn').addEventListener('click', () => {
   const raw = document.getElementById('session-name-input').value.trim();
-  focusName    = raw || 'Untitled Session';
-  focusStart   = Date.now();
-  focusPaused  = false;
-  pausedAt     = 0;
-  focusElapsed = 0;
+  focusName     = raw || 'Untitled Session';
+  focusStart    = Date.now();
+  focusPaused   = false;
+  pausedAt      = 0;
+  focusElapsed  = 0;
+  continueIndex = null;
 
   showActive(focusName);
   updateStatusDot(false);
@@ -459,14 +612,23 @@ document.getElementById('stop-btn').addEventListener('click', () => {
   tickInterval = null;
 
   if (focusElapsed > 0) {
-    saveSession({ name: focusName, duration: focusElapsed, date: new Date().toISOString() });
+    const sessions = loadSessions();
+    if (continueIndex !== null && sessions[continueIndex]) {
+      // Update the existing session's duration
+      sessions[continueIndex].duration = focusElapsed;
+      sessions[continueIndex].date     = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+    } else {
+      saveSession({ name: focusName, duration: focusElapsed, date: new Date().toISOString() });
+    }
     renderHistory();
   }
 
-  focusStart  = null;
-  focusPaused = false;
-  pausedAt    = 0;
-  focusElapsed = 0;
+  focusStart    = null;
+  focusPaused   = false;
+  pausedAt      = 0;
+  focusElapsed  = 0;
+  continueIndex = null;
   showIdle();
 });
 
@@ -498,6 +660,29 @@ function clearSessions() {
   renderHistory();
 }
 
+/* ── Continue a previous session ── */
+function continueSession(index) {
+  if (tickInterval) return; // already running
+  const sessions = loadSessions();
+  const s = sessions[index];
+  if (!s) return;
+
+  focusName     = s.name;
+  pausedAt      = s.duration;   // start elapsed from where it left off
+  focusStart    = Date.now();
+  focusPaused   = false;
+  focusElapsed  = s.duration;
+  continueIndex = index;
+
+  showActive(focusName);
+  updateStatusDot(false);
+  tickInterval = setInterval(focusTick, 1000);
+  focusTick();
+
+  // Scroll focus card into view
+  document.querySelector('.focus-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
 /* ── Render history ── */
 function renderHistory() {
   const sessions = loadSessions();
@@ -511,23 +696,53 @@ function renderHistory() {
     return;
   }
 
-  list.innerHTML = sessions.map(s => `
+  list.innerHTML = sessions.map((s, i) => `
     <li>
       <div class="session-item-name">${escHtml(s.name)}</div>
       <div class="session-item-meta">
         <div class="session-item-dur">${fmtDuration(s.duration)}</div>
         <div class="session-item-date">${fmtDate(s.date)}</div>
       </div>
+      <div class="session-item-actions">
+        <button class="session-continue-btn" data-index="${i}" title="Continue this session"><svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor"><path d="M2 1.5l9 4.5-9 4.5z"/></svg></button>
+        <button class="session-delete-btn"   data-index="${i}" title="Delete this session"><svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      </div>
     </li>
   `).join('');
+
+  list.querySelectorAll('.session-continue-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      continueSession(Number(btn.dataset.index));
+    });
+  });
+
+  list.querySelectorAll('.session-delete-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      deleteSession(Number(btn.dataset.index));
+    });
+  });
 }
 
 function escHtml(str) {
   return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+function deleteSession(index) {
+  const list = loadSessions();
+  list.splice(index, 1);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  renderHistory();
+}
+
 document.getElementById('clear-btn').addEventListener('click', () => {
   if (confirm('Clear all saved sessions?')) clearSessions();
+});
+
+/* ── Info panel toggle ── */
+document.getElementById('info-toggle').addEventListener('click', () => {
+  document.getElementById('info-panel').classList.toggle('open');
 });
 
 /* ── Allow Enter key to start ── */
