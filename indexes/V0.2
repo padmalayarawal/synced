@@ -187,6 +187,79 @@
     }
     .session-controls { display: flex; gap: 0.75rem; }
 
+    /* ── Fullscreen expand btn ── */
+    .expand-btn {
+      position: absolute; top: 1rem; right: 1rem;
+      background: none; border: 1px solid var(--border);
+      border-radius: 6px; color: var(--muted); cursor: pointer;
+      padding: 5px 7px; display: flex; align-items: center; justify-content: center;
+      transition: color 0.15s, border-color 0.15s;
+      z-index: 2;
+    }
+    .expand-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
+
+    /* session header needs relative too */
+    .focus-card { position: relative; }
+
+    /* ── Fullscreen overlay ── */
+    .fs-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: var(--bg);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .fs-overlay.visible { opacity: 1; pointer-events: all; }
+
+    .fs-label {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 1rem; font-style: italic;
+      color: var(--muted); letter-spacing: 0.15em;
+      margin-bottom: 1.5rem;
+    }
+    .fs-timer {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(5rem, 20vw, 16rem);
+      font-weight: 700; color: var(--text);
+      letter-spacing: -0.02em; line-height: 1;
+    }
+    .fs-sub {
+      margin-top: 1.5rem;
+      font-size: 0.75rem; color: var(--muted); letter-spacing: 0.1em;
+    }
+    .fs-progress-wrap {
+      width: min(700px, 80vw); height: 2px;
+      background: var(--border); border-radius: 99px; overflow: hidden;
+      margin-top: 2rem;
+    }
+    .fs-progress-fill {
+      height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+      transition: width 1s linear;
+    }
+    .fs-status {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-top: 1.2rem; font-size: 0.72rem; color: var(--muted); letter-spacing: 0.1em;
+    }
+    .fs-close {
+      position: fixed; top: 1.5rem; right: 1.5rem;
+      background: none; border: 1px solid var(--border);
+      border-radius: 8px; color: var(--muted); cursor: pointer;
+      padding: 8px 14px; font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; letter-spacing: 0.06em;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .fs-close:hover { color: var(--text); border-color: var(--muted); }
+
+    /* grain on overlay too */
+    .fs-overlay::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
     /* ── History ── */
     .history-card {
       background: var(--surface);
@@ -377,6 +450,11 @@
 
   <!-- Day countdown -->
   <div class="clock-card">
+    <button class="expand-btn" id="expand-day" title="Fullscreen">
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <path d="M1 5V1h4M9 1h4v4M13 9v4H9M5 13H1V9"/>
+      </svg>
+    </button>
     <div class="clock-label">next daily reset in</div>
     <div id="day-timer">00:00:00</div>
     <div class="progress-bar-wrap">
@@ -408,9 +486,16 @@
     <div class="active-session" id="active-session">
       <div class="session-header">
         <div class="session-name-tag" id="active-name">—</div>
-        <div class="session-status">
-          <span class="status-dot" id="status-dot"></span>
-          <span id="status-text">FOCUSING</span>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <div class="session-status">
+            <span class="status-dot" id="status-dot"></span>
+            <span id="status-text">FOCUSING</span>
+          </div>
+          <button class="expand-btn" id="expand-focus" title="Fullscreen" style="position:static;">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M1 5V1h4M9 1h4v4M13 9v4H9M5 13H1V9"/>
+            </svg>
+          </button>
         </div>
       </div>
       <div id="focus-timer">00:00:00</div>
@@ -497,6 +582,29 @@
   </div>
 
   <div class="footer">The best present of life is PRESENT :)</div>
+
+</div>
+
+<!-- Fullscreen: Day Timer (outside wrap, directly in body) -->
+<div class="fs-overlay" id="fs-day">
+  <button class="fs-close" id="fs-day-close" type="button">✕ &nbsp;exit fullscreen</button>
+  <div class="fs-label">next daily reset in</div>
+  <div class="fs-timer" id="fs-day-timer">00:00:00</div>
+  <div class="fs-progress-wrap">
+    <div class="fs-progress-fill" id="fs-day-progress" style="width:0%"></div>
+  </div>
+  <div class="fs-sub" id="fs-day-pct">0% of today elapsed</div>
+</div>
+
+<!-- Fullscreen: Focus Session (outside wrap, directly in body) -->
+<div class="fs-overlay" id="fs-focus">
+  <button class="fs-close" id="fs-focus-close" type="button">✕ &nbsp;exit fullscreen</button>
+  <div class="fs-label" id="fs-focus-label">focusing</div>
+  <div class="fs-timer" id="fs-focus-timer">00:00:00</div>
+  <div class="fs-status">
+    <span class="status-dot" id="fs-status-dot"></span>
+    <span id="fs-status-text">FOCUSING</span>
+  </div>
 </div>
 
 <script>
@@ -646,6 +754,7 @@ function updateStatusDot(paused) {
     text.textContent = 'FOCUSING';
     btn.textContent  = 'Pause';
   }
+  syncFsFocus();
 }
 
 /* ── Local storage ── */
@@ -748,6 +857,77 @@ document.getElementById('info-toggle').addEventListener('click', () => {
 /* ── Allow Enter key to start ── */
 document.getElementById('session-name-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('start-btn').click();
+});
+
+/* ── Fullscreen logic ── */
+let fsDay   = false;
+let fsFocus = false;
+
+function openFsDay() {
+  fsDay = true;
+  document.getElementById('fs-day').classList.add('visible');
+  syncFsDay();
+}
+function closeFsDay() {
+  fsDay = false;
+  document.getElementById('fs-day').classList.remove('visible');
+}
+
+function openFsFocus() {
+  fsFocus = true;
+  const overlay = document.getElementById('fs-focus');
+  overlay.classList.add('visible');
+  document.getElementById('fs-focus-label').textContent = focusName || 'focusing';
+  syncFsFocus();
+}
+function closeFsFocus() {
+  fsFocus = false;
+  document.getElementById('fs-focus').classList.remove('visible');
+}
+
+function syncFsDay() {
+  if (!fsDay) return;
+  const now      = new Date();
+  const tomorrow = new Date(now);
+  tomorrow.setHours(24, 0, 0, 0);
+  const diff    = Math.floor((tomorrow - now) / 1000);
+  const elapsed = SECONDS_IN_DAY - diff;
+  const pct     = ((elapsed / SECONDS_IN_DAY) * 100).toFixed(1);
+  const h = Math.floor(diff / 3600);
+  const m = Math.floor((diff % 3600) / 60);
+  const s = diff % 60;
+  document.getElementById('fs-day-timer').textContent    = `${pad(h)}:${pad(m)}:${pad(s)}`;
+  document.getElementById('fs-day-progress').style.width = pct + '%';
+  document.getElementById('fs-day-pct').textContent      = pct + '% of today elapsed';
+}
+
+function syncFsFocus() {
+  if (!fsFocus) return;
+  document.getElementById('fs-focus-timer').textContent = fmtDuration(focusElapsed);
+  const dot  = document.getElementById('fs-status-dot');
+  const text = document.getElementById('fs-status-text');
+  if (focusPaused) {
+    dot.classList.add('paused');
+    text.textContent = 'PAUSED';
+  } else {
+    dot.classList.remove('paused');
+    text.textContent = 'FOCUSING';
+  }
+}
+
+// Sync overlays every second
+setInterval(() => { syncFsDay(); syncFsFocus(); }, 1000);
+
+document.getElementById('expand-day').addEventListener('click', openFsDay);
+document.getElementById('fs-day-close').addEventListener('click', closeFsDay);
+document.getElementById('expand-focus').addEventListener('click', () => {
+  if (tickInterval) openFsFocus();
+});
+document.getElementById('fs-focus-close').addEventListener('click', closeFsFocus);
+
+// ESC key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeFsDay(); closeFsFocus(); }
 });
 
 /* ── Init ── */
