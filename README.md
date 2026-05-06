@@ -15,5 +15,8 @@ Features of V0.2:
 2. Current Date, Link to article and info on how the data is being stored
 3. Start a countdown and countup timers
 4. Delete and resume individual session
-5. Delete all sessions at once 
+5. Delete all sessions at once
+6. Edit session name
+7. Added limit to m and s with error message and shaking animation
+8. Edit the session name anytime
 <img width="1494" height="858" alt="Synced V0 2" src="https://github.com/user-attachments/assets/db6f7da5-2644-4221-8b24-86223ebc2cde" />
